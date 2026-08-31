@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.List;
 
@@ -12,6 +14,10 @@ import java.util.List;
 @Setter
 @Getter
 @Table(name = "vendors")
+// Overrides physical DELETE with an UPDATE query
+@SQLDelete(sql = "UPDATE vendors SET deleted = true WHERE id = ?")
+// Automatically filters out deleted records for all SELECT queries
+@SQLRestriction("deleted = false")
 public class InventoryVendor {
 
     @Id
@@ -39,6 +45,10 @@ public class InventoryVendor {
     private String email;
 
     private String phone;
+
+    // Soft delete status flag
+    @Column(nullable = false)
+    private boolean deleted = false;
 
     @OneToMany(mappedBy = "vendor", cascade = CascadeType.ALL)
     @JsonIgnore

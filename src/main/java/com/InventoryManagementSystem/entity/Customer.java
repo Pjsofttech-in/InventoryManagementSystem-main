@@ -29,10 +29,6 @@ public class Customer {
     @Enumerated(EnumType.STRING)
     private State state;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "vendor_id")
-    private InventoryVendor vendor;
-
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<InventoryOrder> orders;

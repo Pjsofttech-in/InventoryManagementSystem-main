@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
 
@@ -13,6 +15,8 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Table(name = "payments")
+@SQLDelete(sql = "UPDATE payments SET is_deleted = true WHERE id = ?")
+@SQLRestriction("is_deleted = false")
 public class InventoryPayment {
 
     @Id
@@ -33,6 +37,13 @@ public class InventoryPayment {
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status")
     private PaymentStatus paymentStatus;
+
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "receiving_bank_account_id")
+    private BankAccount receivingAccount;
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)

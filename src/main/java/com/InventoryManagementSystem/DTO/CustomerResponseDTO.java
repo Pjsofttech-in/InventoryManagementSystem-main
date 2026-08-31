@@ -12,8 +12,4 @@ public class CustomerResponseDTO {
     private String city;
     private String state;
     private String email;
-
-    private Long vendorId;
-    private String vendorName;
-    private String companyName;
 }

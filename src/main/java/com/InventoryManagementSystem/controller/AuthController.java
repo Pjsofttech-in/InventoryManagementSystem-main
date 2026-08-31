@@ -4,7 +4,7 @@ import com.InventoryManagementSystem.DTO.AuthRequest;
 import com.InventoryManagementSystem.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-@CrossOrigin(origins = "https://pjsofttech.com")
+@CrossOrigin(origins = {"https://pjsofttech.com","http://localhost:5173"}  )
 @RestController
 @RequestMapping("/auth")
 

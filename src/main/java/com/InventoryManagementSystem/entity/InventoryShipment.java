@@ -22,11 +22,8 @@ public class InventoryShipment {
     private String trackingId;
 
     private String trackingLink;
-
     private String shipmentName;
-
     private LocalDate shipmentDate;
-
     private String shipmentAddress;
 
     @Enumerated(EnumType.STRING)
@@ -35,15 +32,14 @@ public class InventoryShipment {
     private String customerName;
     private String customerMobile;
     private String customerAddress;
-
     private String companyName;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "order_id", nullable = false)
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "order_id", nullable = false, unique = true)
     @JsonBackReference
     private InventoryOrder order;
 
     public InventoryShipment() {
-        this.shipmentDate = LocalDate.now(); // auto date
+        this.shipmentDate = LocalDate.now();
     }
 }

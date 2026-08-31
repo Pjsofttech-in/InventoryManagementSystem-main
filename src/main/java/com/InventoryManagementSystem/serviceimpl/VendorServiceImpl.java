@@ -21,20 +21,20 @@ public class VendorServiceImpl implements VendorService {
 
     @Override
     public List<InventoryVendor> getAllVendors() {
+        // Automatically filtered by @SQLRestriction("deleted = false")
         return vendorRepository.findAll();
     }
 
     @Override
     public InventoryVendor getVendorById(Long id) {
+        // Automatically filtered by @SQLRestriction("deleted = false")
         return vendorRepository.findById(id).orElse(null);
     }
 
     @Override
     public InventoryVendor updateVendor(Long id, InventoryVendor vendor) {
-
         InventoryVendor existing = vendorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vendor Not Found: " + id));
-
 
         existing.setVendorName(vendor.getVendorName());
         existing.setCompanyName(vendor.getCompanyName());
@@ -49,8 +49,10 @@ public class VendorServiceImpl implements VendorService {
 
         return vendorRepository.save(existing);
     }
+
     @Override
     public void deleteVendor(Long id) {
+        // Executes: UPDATE vendors SET deleted = true WHERE id = ?
         vendorRepository.deleteById(id);
     }
 }

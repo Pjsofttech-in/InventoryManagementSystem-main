@@ -3,10 +3,8 @@ package com.InventoryManagementSystem.serviceimpl;
 import com.InventoryManagementSystem.DTO.CustomerRequestDTO;
 import com.InventoryManagementSystem.DTO.CustomerResponseDTO;
 import com.InventoryManagementSystem.entity.Customer;
-import com.InventoryManagementSystem.entity.InventoryVendor;
 import com.InventoryManagementSystem.Enum.State;
 import com.InventoryManagementSystem.repository.CustomerRepository;
-import com.InventoryManagementSystem.repository.VendorRepository;
 import com.InventoryManagementSystem.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,15 +18,8 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
 
-    @Autowired
-    private VendorRepository vendorRepository;
-
     @Override
     public CustomerResponseDTO saveCustomer(CustomerRequestDTO dto) {
-
-        if (dto.getVendorId() == null) {
-            throw new RuntimeException("Vendor ID must not be null");
-        }
 
         Customer customer = new Customer();
 
@@ -45,11 +36,6 @@ public class CustomerServiceImpl implements CustomerService {
         } catch (Exception e) {
             throw new RuntimeException("Invalid State value");
         }
-
-        InventoryVendor vendor = vendorRepository.findById(dto.getVendorId())
-                .orElseThrow(() -> new RuntimeException("Vendor not found with id: " + dto.getVendorId()));
-
-        customer.setVendor(vendor);
 
         Customer saved = customerRepository.save(customer);
 
@@ -94,12 +80,6 @@ public class CustomerServiceImpl implements CustomerService {
             throw new RuntimeException("Invalid State value");
         }
 
-        if (dto.getVendorId() != null) {
-            InventoryVendor vendor = vendorRepository.findById(dto.getVendorId())
-                    .orElseThrow(() -> new RuntimeException("Vendor not found"));
-            customer.setVendor(vendor);
-        }
-
         Customer updated = customerRepository.save(customer);
 
         return mapToResponse(updated);
@@ -119,12 +99,6 @@ public class CustomerServiceImpl implements CustomerService {
         dto.setCity(customer.getCity());
         dto.setState(customer.getState().name());
         dto.setEmail(customer.getEmail());
-
-        if (customer.getVendor() != null) {
-            dto.setVendorId(customer.getVendor().getId());
-            dto.setVendorName(customer.getVendor().getVendorName());
-            dto.setCompanyName(customer.getVendor().getCompanyName());
-        }
 
         return dto;
     }

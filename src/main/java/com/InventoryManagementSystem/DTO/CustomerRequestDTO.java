@@ -15,5 +15,4 @@ public class CustomerRequestDTO {
     private String email;
     private String phone;
     private String state;
-    private Long vendorId;
 }

@@ -7,7 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-@CrossOrigin(origins = "https://pjsofttech.com")
+
+@CrossOrigin(origins = {"http://localhost:5173", "https://pjsofttech.com"})
 @RestController
 public class VendorController {
 
@@ -15,33 +16,28 @@ public class VendorController {
     private VendorService vendorService;
 
     @PostMapping("/createVendor")
-    public InventoryVendor createVendor(@RequestBody InventoryVendor vendor)
-    {
+    public InventoryVendor createVendor(@RequestBody InventoryVendor vendor) {
         return vendorService.saveVendor(vendor);
     }
 
     @GetMapping("/getallVendor")
-    public List<InventoryVendor> getAllVendors()
-    {
+    public List<InventoryVendor> getAllVendors() {
         return vendorService.getAllVendors();
     }
 
     @GetMapping("/getbyIdVendor/{id}")
-    public InventoryVendor getVendorById(@PathVariable Long id)
-    {
+    public InventoryVendor getVendorById(@PathVariable Long id) {
         return vendorService.getVendorById(id);
     }
 
     @PutMapping("/updateVendor/{id}")
-    public InventoryVendor updateVendor(@PathVariable Long id, @RequestBody InventoryVendor vendor)
-    {
+    public InventoryVendor updateVendor(@PathVariable Long id, @RequestBody InventoryVendor vendor) {
         return vendorService.updateVendor(id, vendor);
     }
 
     @DeleteMapping("/deleteVendor/{id}")
-    public ResponseEntity<String> deleteVendor(@PathVariable Long id)
-    {
+    public ResponseEntity<String> deleteVendor(@PathVariable Long id) {
         vendorService.deleteVendor(id);
-        return ResponseEntity.ok("Vendor Deleted Successflly");
+        return ResponseEntity.ok("Vendor deleted successfully");
     }
 }

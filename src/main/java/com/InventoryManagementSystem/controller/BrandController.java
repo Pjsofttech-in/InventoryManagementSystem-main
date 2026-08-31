@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-@CrossOrigin(origins = "https://pjsofttech.com")
+@CrossOrigin(origins = {"http://localhost:5173", "https://pjsofttech.com"})
 @RestController
 public class BrandController {
 
@@ -28,6 +28,7 @@ public class BrandController {
     @GetMapping("/getBrandById/{id}")
     public InventoryBrand getBrandById(@PathVariable Long id)
     {
+
         return brandService.getBrandById(id);
     }
 

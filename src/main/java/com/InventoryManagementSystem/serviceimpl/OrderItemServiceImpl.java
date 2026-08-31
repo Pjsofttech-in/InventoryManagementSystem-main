@@ -8,6 +8,7 @@ import com.InventoryManagementSystem.repository.OrderRepository;
 import com.InventoryManagementSystem.repository.ProductRepository;
 import com.InventoryManagementSystem.service.OrderItemService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
+    @Transactional
     public InventoryOrderItem createOrderItem(Long orderId, Long productId, Integer quantity) {
 
         InventoryOrder order = orderRepository.findById(orderId)
@@ -35,12 +37,32 @@ public class OrderItemServiceImpl implements OrderItemService {
         InventoryProduct product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
+        // 1. Stock Check
+        int currentStock = product.getStock() != null ? product.getStock() : 0;
+        if (currentStock < quantity) {
+            throw new RuntimeException("Insufficient stock for product: " + product.getProductName()
+                    + ". Available: " + currentStock + ", Requested: " + quantity);
+        }
+
+        // 2. Reduce Stock
+        product.setStock(currentStock - quantity);
+        productRepository.save(product);
+
         InventoryOrderItem item = new InventoryOrderItem();
         item.setOrder(order);
         item.setProduct(product);
         item.setQuantity(quantity);
 
-        return orderItemRepository.save(item);
+        // Calculations run using fetched customerPrice from Product
+        item.calculateValues();
+
+        InventoryOrderItem savedItem = orderItemRepository.save(item);
+
+        // Recalculate Order Total
+        order.calculateGrandTotal();
+        orderRepository.save(order);
+
+        return savedItem;
     }
 
     @Override
