@@ -55,6 +55,7 @@ public class StockBatchServiceImpl implements StockBatchService {
                 .vendorMrp(request.getVendorMrp() == null ? BigDecimal.ZERO : request.getVendorMrp())
                 .vendorDiscountPercentage(request.getVendorDiscountPercentage() == null ? BigDecimal.ZERO : request.getVendorDiscountPercentage())
                 .purchasePrice(request.getPurchasePrice())
+                .productMrp(request.getProductMrp() == null ? BigDecimal.ZERO : request.getProductMrp())
                 .sellingPrice(request.getSellingPrice())
                 .initialQuantity(request.getQuantity())
                 .availableQuantity(request.getQuantity())
@@ -71,12 +72,13 @@ public class StockBatchServiceImpl implements StockBatchService {
         if (request.getVendorMrp() != null) product.setMrp(request.getVendorMrp().doubleValue());
         if (request.getVendorDiscountPercentage() != null) product.setVendorDiscountPercentage(request.getVendorDiscountPercentage().doubleValue());
         if (request.getPurchasePrice() != null) product.setStorePrice(request.getPurchasePrice().doubleValue());
+        if (request.getProductMrp() != null) product.setProductMrp(request.getProductMrp().doubleValue());
         if (request.getSellingPrice() != null) product.setCustomerPrice(request.getSellingPrice().doubleValue());
         productRepository.save(product);
 
         StockHistory history = new StockHistory(
                 product, vendor, currentTotal, request.getQuantity(), currentTotal + request.getQuantity(),
-                product.getMrp(), product.getVendorDiscountPercentage(), product.getStorePrice(), product.getCustomerPrice(),
+                product.getMrp(), product.getVendorDiscountPercentage(), product.getStorePrice(), product.getProductMrp(), product.getCustomerPrice(),
                 "RESTOCK", "Stock batch purchased");
         stockHistoryRepository.save(history);
 

@@ -101,6 +101,7 @@ public class ProductServiceImpl implements ProductService {
                 ? request.getStorePrice()
                 : (request.getPurchasePrice() != null ? request.getPurchasePrice()
                 : calculateStorePrice(newMrp, newDiscount));
+        Double newProductMrp = request.getProductMrp() != null ? request.getProductMrp() : product.getProductMrp();
         Double newCustomerPrice = request.getCustomerPrice() != null ? request.getCustomerPrice() : product.getCustomerPrice();
 
         // IMPORTANT: replace current prices with the new batch prices. No averaging.
@@ -108,6 +109,7 @@ public class ProductServiceImpl implements ProductService {
         product.setMrp(newMrp);
         product.setVendorDiscountPercentage(newDiscount);
         product.setStorePrice(newStorePrice);
+        product.setProductMrp(newProductMrp);
         product.setCustomerPrice(newCustomerPrice);
 
         int previousStock = product.getStock() == null ? 0 : product.getStock();
@@ -129,6 +131,7 @@ public class ProductServiceImpl implements ProductService {
                 .vendorMrp(BigDecimal.valueOf(newMrp == null ? 0 : newMrp))
                 .vendorDiscountPercentage(BigDecimal.valueOf(newDiscount == null ? 0 : newDiscount))
                 .purchasePrice(purchasePrice)
+                .productMrp(BigDecimal.valueOf(newProductMrp == null ? 0 : newProductMrp))
                 .sellingPrice(sellingPrice)
                 .initialQuantity(addedQty)
                 .availableQuantity(addedQty)
@@ -139,7 +142,7 @@ public class ProductServiceImpl implements ProductService {
 
         StockHistory history = new StockHistory(
                 updatedProduct, vendor, previousStock, addedQty, newStock,
-                newMrp, newDiscount, newStorePrice, newCustomerPrice,
+                newMrp, newDiscount, newStorePrice, newProductMrp, newCustomerPrice,
                 "RESTOCK", request.getRemarks());
         stockHistoryRepository.save(history);
 

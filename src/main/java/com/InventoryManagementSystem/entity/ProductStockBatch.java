@@ -47,6 +47,9 @@ public class ProductStockBatch {
     @Column(nullable = false)
     private BigDecimal purchasePrice;
 
+    // Actual Product MRP (real MRP printed on the product) at the time of this batch.
+    private BigDecimal productMrp;
+
     @Column(nullable = false)
     private BigDecimal sellingPrice;
 

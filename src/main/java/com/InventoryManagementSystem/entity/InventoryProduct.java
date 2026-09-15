@@ -25,10 +25,11 @@ public class InventoryProduct {
     private String productName;
 
     // --- Pricing Structure with Default Values ---
-    private Double mrp = 0.0;                      // Original Vendor MRP
-    private Double vendorDiscountPercentage = 0.0; // Vendor Discount % on MRP
-    private Double storePrice = 0.0;               // Purchase Price after vendor discount
-    private Double customerPrice = 0.0;            // Current base store/customer price (final price shown to customer)
+    private Double mrp = 0.0;                      // Vendor MRP (price vendor gives to us as MRP)
+    private Double vendorDiscountPercentage = 0.0; // Vendor Discount % on Vendor MRP
+    private Double storePrice = 0.0;               // Vendor Discounted Price = Purchase Price after vendor discount
+    private Double productMrp = 0.0;                // Actual Product MRP (printed/real MRP of the product, shown to the customer)
+    private Double customerPrice = 0.0;            // Store Price / Selling Price (current base store/customer price)
 
     // --- Dynamic GST Structure ---
     private Boolean gstApplicable = false;
@@ -66,6 +67,7 @@ public class InventoryProduct {
         // Safe null-checks
         if (this.mrp == null) this.mrp = 0.0;
         if (this.vendorDiscountPercentage == null) this.vendorDiscountPercentage = 0.0;
+        if (this.productMrp == null) this.productMrp = 0.0;
         if (this.customerPrice == null) this.customerPrice = 0.0;
         if (this.stock == null) this.stock = 0;
 

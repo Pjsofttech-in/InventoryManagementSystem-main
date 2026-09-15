@@ -12,10 +12,11 @@ public class StockUpdateRequest {
     private Long vendorId;
 
     // Current product prices after this restock (these are NOT averaged with old prices).
-    private Double mrp;
+    private Double mrp;                 // Vendor MRP
     private Double vendorDiscountPercentage;
-    private Double storePrice;
-    private Double customerPrice;
+    private Double storePrice;          // Vendor Discounted Price (purchase price)
+    private Double productMrp;          // Actual Product MRP (real MRP printed on product)
+    private Double customerPrice;       // Store Price / Selling Price
 
     // New stock batch details.
     private String batchNumber;

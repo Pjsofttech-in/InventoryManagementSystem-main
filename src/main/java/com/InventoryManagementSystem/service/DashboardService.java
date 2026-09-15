@@ -9,4 +9,5 @@ public interface DashboardService {
  List<RevenuePointDTO> getDailyRevenue(int days);
  List<OrderRevenueDTO> getOrderWiseRevenue(int limit);
  List<RevenuePointDTO> getPaymentStatusRevenue();
+ List<AnalyticsPointDTO> getAnalytics(String range);
 }

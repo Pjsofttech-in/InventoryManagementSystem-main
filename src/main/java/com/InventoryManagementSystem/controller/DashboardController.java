@@ -14,4 +14,5 @@ public class DashboardController {
  @GetMapping("/daily-revenue") public ResponseEntity<List<RevenuePointDTO>> daily(@RequestParam(defaultValue="7") int days){return ResponseEntity.ok(dashboardService.getDailyRevenue(days));}
  @GetMapping("/order-wise-revenue") public ResponseEntity<List<OrderRevenueDTO>> orderWise(@RequestParam(defaultValue="10") int limit){return ResponseEntity.ok(dashboardService.getOrderWiseRevenue(limit));}
  @GetMapping("/payment-status-revenue") public ResponseEntity<List<RevenuePointDTO>> paymentStatus(){return ResponseEntity.ok(dashboardService.getPaymentStatusRevenue());}
+ @GetMapping("/analytics") public ResponseEntity<List<AnalyticsPointDTO>> analytics(@RequestParam(defaultValue="7D") String range){return ResponseEntity.ok(dashboardService.getAnalytics(range));}
 }

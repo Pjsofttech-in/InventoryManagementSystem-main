@@ -89,6 +89,13 @@ public class InventoryOrder {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
+    /*
+     * Date by which the customer must complete payment for this order.
+     * Optional: if not sent by the frontend it stays null and no overdue
+     * check is done for this order.
+     */
+    private LocalDate paymentDueDate;
+
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
@@ -122,6 +129,20 @@ public class InventoryOrder {
 
     @Transient
     private PaymentMethod paymentMethod;
+
+    /*
+     * True when paymentDueDate has passed and payment is still pending.
+     * Calculated fresh every time the order is fetched.
+     */
+    @Transient
+    private Boolean paymentOverdue = false;
+
+    /*
+     * How many days past paymentDueDate the pending payment is.
+     * 0 when not overdue.
+     */
+    @Transient
+    private Long overdueDays = 0L;
 
     public InventoryOrder() {
     }

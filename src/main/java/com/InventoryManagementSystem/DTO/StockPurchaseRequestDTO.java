@@ -12,6 +12,7 @@ public class StockPurchaseRequestDTO {
     private BigDecimal vendorMrp;
     private BigDecimal vendorDiscountPercentage;
     private BigDecimal purchasePrice; // final vendor price after discount
+    private BigDecimal productMrp; // Actual Product MRP (real MRP printed on product)
     private BigDecimal sellingPrice; // final store/customer price
     private Integer quantity;
     private LocalDate receivedDate; // Fixed: Added receivedDate field

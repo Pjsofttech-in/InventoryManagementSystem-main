@@ -135,6 +135,13 @@ public class InventoryOrderItem {
     private Integer quantity = 0;
 
     /*
+     * Actual Product MRP (real MRP printed on the product), copied from the
+     * product at the time of order so it stays fixed even if the product's
+     * MRP changes later.
+     */
+    private Double productMrp = 0.0;
+
+    /*
      * Original customer price before order discount.
      */
     private Double unitPrice = 0.0;

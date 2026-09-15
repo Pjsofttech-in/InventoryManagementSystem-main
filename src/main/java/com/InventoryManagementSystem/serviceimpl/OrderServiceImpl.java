@@ -1,5 +1,6 @@
 package com.InventoryManagementSystem.serviceimpl;
 
+import com.InventoryManagementSystem.DTO.OrderGstSummaryDTO;
 import com.InventoryManagementSystem.entity.Customer;
 import com.InventoryManagementSystem.entity.InventoryOrder;
 import com.InventoryManagementSystem.entity.InventoryOrderItem;
@@ -198,6 +199,18 @@ public class OrderServiceImpl implements OrderService {
             item.setUnitPrice(customerPrice);
 
             /*
+             * Snapshot the product's actual MRP (the real MRP printed on
+             * the product) at the time of order, so order screens can show
+             * MRP + store price + discount without depending on the
+             * product's current data.
+             */
+            item.setProductMrp(
+                    product.getProductMrp() != null
+                            ? product.getProductMrp()
+                            : 0.0
+            );
+
+            /*
              * Copy product GST configuration.
              *
              * This creates a historical snapshot.
@@ -349,6 +362,7 @@ public class OrderServiceImpl implements OrderService {
                             product.getMrp(),
                             product.getVendorDiscountPercentage(),
                             product.getStorePrice(),
+                            product.getProductMrp(),
                             product.getCustomerPrice(),
                             "ORDER_DEDUCTION",
                             "Stock deducted for order"
@@ -464,6 +478,58 @@ public class OrderServiceImpl implements OrderService {
         else if (paid > 0.009) order.setPaymentStatus(com.InventoryManagementSystem.Enum.PaymentStatus.PARTIAL);
         else order.setPaymentStatus(com.InventoryManagementSystem.Enum.PaymentStatus.UNPAID);
         payments.stream().filter(p -> p.getPaymentStatus() == com.InventoryManagementSystem.Enum.PaymentStatus.PAID || p.getPaymentStatus() == com.InventoryManagementSystem.Enum.PaymentStatus.PARTIAL).findFirst().ifPresent(p -> order.setPaymentMethod(p.getPaymentMethod()));
+
+        /*
+         * Handle payment due date: if the due date has passed and money is
+         * still pending, mark the order overdue and switch its payment
+         * status to OVERDUE (this is recalculated every time the order is
+         * fetched, so it always reflects "today").
+         */
+        order.setPaymentOverdue(false);
+        order.setOverdueDays(0L);
+        if (order.getPaymentDueDate() != null && due > 0.009) {
+            java.time.LocalDate today = java.time.LocalDate.now();
+            if (today.isAfter(order.getPaymentDueDate())) {
+                long daysLate = java.time.temporal.ChronoUnit.DAYS.between(order.getPaymentDueDate(), today);
+                order.setPaymentOverdue(true);
+                order.setOverdueDays(daysLate);
+                order.setPaymentStatus(com.InventoryManagementSystem.Enum.PaymentStatus.OVERDUE);
+            }
+        }
+    }
+
+    @Override
+    public OrderGstSummaryDTO getOrdersGstSummary() {
+        List<InventoryOrder> orders = orderRepository.findAll();
+        orders.forEach(this::populatePaymentSummary);
+
+        OrderGstSummaryDTO summary = new OrderGstSummaryDTO();
+
+        double totalGst = 0.0, totalCgst = 0.0, totalSgst = 0.0, totalUgst = 0.0, totalIgst = 0.0;
+        double totalOverdueAmount = 0.0;
+        int overdueOrders = 0;
+
+        for (InventoryOrder order : orders) {
+            totalGst += order.getTotalGstAmount() != null ? order.getTotalGstAmount() : 0.0;
+            totalCgst += order.getTotalCgstAmount() != null ? order.getTotalCgstAmount() : 0.0;
+            totalSgst += order.getTotalSgstAmount() != null ? order.getTotalSgstAmount() : 0.0;
+            totalUgst += order.getTotalUgstAmount() != null ? order.getTotalUgstAmount() : 0.0;
+            totalIgst += order.getTotalIgstAmount() != null ? order.getTotalIgstAmount() : 0.0;
+            if (Boolean.TRUE.equals(order.getPaymentOverdue())) {
+                overdueOrders++;
+                totalOverdueAmount += order.getPendingAmount() != null ? order.getPendingAmount() : 0.0;
+            }
+        }
+
+        summary.setTotalOrders(orders.size());
+        summary.setTotalGstAmount(totalGst);
+        summary.setTotalCgstAmount(totalCgst);
+        summary.setTotalSgstAmount(totalSgst);
+        summary.setTotalUgstAmount(totalUgst);
+        summary.setTotalIgstAmount(totalIgst);
+        summary.setOverdueOrdersCount(overdueOrders);
+        summary.setTotalOverdueAmount(totalOverdueAmount);
+        return summary;
     }
 
     @Override
@@ -520,6 +586,7 @@ public class OrderServiceImpl implements OrderService {
                                     product.getMrp(),
                                     product.getVendorDiscountPercentage(),
                                     product.getStorePrice(),
+                                    product.getProductMrp(),
                                     product.getCustomerPrice(),
                                     "ORDER_RESTORE",
                                     "Stock restored after order deletion"

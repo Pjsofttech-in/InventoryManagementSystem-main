@@ -39,6 +39,7 @@
 
 package com.InventoryManagementSystem.controller;
 
+import com.InventoryManagementSystem.DTO.OrderGstSummaryDTO;
 import com.InventoryManagementSystem.entity.InventoryOrder;
 import com.InventoryManagementSystem.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,5 +84,11 @@ public class OrderController {
     public ResponseEntity<String> deleteOrder(@PathVariable Long id) {
         orderService.deleteOrder(id);
         return ResponseEntity.ok("Order ID " + id + " soft-deleted successfully");
+    }
+
+    // 5. GST grand-total across all orders + overdue payment summary (for the Orders page header/footer).
+    @GetMapping("/getOrdersGstSummary")
+    public ResponseEntity<OrderGstSummaryDTO> getOrdersGstSummary() {
+        return ResponseEntity.ok(orderService.getOrdersGstSummary());
     }
 }

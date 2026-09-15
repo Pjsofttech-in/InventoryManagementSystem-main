@@ -33,7 +33,8 @@ public class StockHistory {
     // --- Pricing History for this Restock Batch ---
     private Double mrp;                      // Vendor MRP for this restock
     private Double vendorDiscountPercentage; // Vendor Discount % for this restock
-    private Double storePrice;               // Calculated Purchase Price per unit for this batch
+    private Double storePrice;               // Calculated Purchase Price per unit for this batch (vendor discounted price)
+    private Double productMrp;               // Actual Product MRP (real MRP printed on product) at this point in time
     private Double customerPrice;             // Final customer/selling price for this restock
 
     private String transactionType;          // e.g., "INITIAL_STOCK", "RESTOCK", "ORDER_DEDUCTION"
@@ -43,7 +44,7 @@ public class StockHistory {
 
     public StockHistory(InventoryProduct product, InventoryVendor vendor, Integer previousStock,
                         Integer addedQuantity, Integer newStock, Double mrp,
-                        Double vendorDiscountPercentage, Double storePrice, Double customerPrice,
+                        Double vendorDiscountPercentage, Double storePrice, Double productMrp, Double customerPrice,
                         String transactionType, String remarks) {
         this.product = product;
         this.vendor = vendor;
@@ -53,6 +54,7 @@ public class StockHistory {
         this.mrp = mrp;
         this.vendorDiscountPercentage = vendorDiscountPercentage;
         this.storePrice = storePrice;
+        this.productMrp = productMrp;
         this.customerPrice = customerPrice;
         this.transactionType = transactionType;
         this.remarks = remarks;
