@@ -4,7 +4,9 @@ import com.InventoryManagementSystem.entity.InventoryProduct;
 import java.util.List;
 public interface DashboardService {
  DashboardSummaryDTO getDashboardSummary();
+ PendingOrdersSummaryDTO getPendingOrdersSummary();
  List<TopProductDTO> getTopSellingProducts(int limit);
+ List<TopCategoryDTO> getTopSellingCategories(int limit);
  List<InventoryProduct> getLowStockAlerts(int threshold);
  List<RevenuePointDTO> getDailyRevenue(int days);
  List<OrderRevenueDTO> getOrderWiseRevenue(int limit);

@@ -1,0 +1,1975 @@
+{
+  "info": {
+    "name": "Inventory Management System - New Features",
+    "description": "Run folders 0 -> 8 in order. Variables (ids, dates, token) are filled automatically by the test / pre-request scripts. Change baseUrl if your server is not on port 8080.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const d = n => { const x = new Date(); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10); };",
+          "pm.collectionVariables.set('today', d(0));",
+          "pm.collectionVariables.set('dueIn7', d(7));",
+          "pm.collectionVariables.set('dueIn15', d(15));",
+          "pm.collectionVariables.set('dueIn30', d(30));",
+          "pm.collectionVariables.set('dueIn60', d(60));",
+          "pm.collectionVariables.set('yesterday', d(-1));",
+          "pm.collectionVariables.set('monthAgo', d(-30));"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "brandId",
+      "value": ""
+    },
+    {
+      "key": "unitTypeId",
+      "value": ""
+    },
+    {
+      "key": "productTypeId",
+      "value": ""
+    },
+    {
+      "key": "subCategoryId",
+      "value": ""
+    },
+    {
+      "key": "subCategoryId2",
+      "value": ""
+    },
+    {
+      "key": "vendorId",
+      "value": ""
+    },
+    {
+      "key": "customerId",
+      "value": ""
+    },
+    {
+      "key": "shippedById",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "orderId",
+      "value": ""
+    },
+    {
+      "key": "orderTotal",
+      "value": ""
+    },
+    {
+      "key": "installmentId",
+      "value": ""
+    },
+    {
+      "key": "installmentPending",
+      "value": "0"
+    },
+    {
+      "key": "customSchedule",
+      "value": "[]"
+    },
+    {
+      "key": "vendorBillId",
+      "value": ""
+    },
+    {
+      "key": "vendorBillDue",
+      "value": ""
+    },
+    {
+      "key": "vendorInstallmentId",
+      "value": ""
+    },
+    {
+      "key": "vendorCustomSchedule",
+      "value": "[]"
+    },
+    {
+      "key": "shipmentId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Auth",
+      "item": [
+        {
+          "name": "Login (sets token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.response.text().replace(/\"/g, '');",
+                  "pm.collectionVariables.set('token', token);",
+                  "pm.test('got token', () => pm.expect(token).to.not.equal('Invalid Credentials'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1. Master data (run once, in order)",
+      "item": [
+        {
+          "name": "Create brand",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/createBrand",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "createBrand"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brandName\": \"Samsung\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('brandId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create unit type",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/createUnitType",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "createUnitType"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unitType\": \"Piece\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('unitTypeId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create product type (category)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/createProductType",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "createProductType"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"typeName\": \"Electronics\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('productTypeId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create vendor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/createVendor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "createVendor"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendorName\": \"Ramesh Patil\",\n  \"companyName\": \"Patil Electronics Wholesale\",\n  \"gstNo\": \"27ABCDE1234F1Z5\",\n  \"landmark\": \"Near Market Yard\",\n  \"city\": \"Pune\",\n  \"taluka\": \"Haveli\",\n  \"state\": \"MAHARASHTRA\",\n  \"pincode\": \"411037\",\n  \"email\": \"ramesh@patilwholesale.in\",\n  \"phone\": \"9822012345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('vendorId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/createCustomer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "createCustomer"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Sneha Kulkarni\",\n  \"landmark\": \"Opp. City Mall\",\n  \"city\": \"Pune\",\n  \"taluka\": \"Pune City\",\n  \"pincode\": \"411001\",\n  \"email\": \"sneha.k@example.com\",\n  \"phone\": \"9876543210\",\n  \"state\": \"MAHARASHTRA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('customerId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create shipped-by (courier)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/createShippedBy",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "createShippedBy"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Delhivery\",\n  \"trackingLink\": \"https://www.delhivery.com/track\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('shippedById', json.id);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Sub categories (NEW)",
+      "item": [
+        {
+          "name": "Create sub category - Mobiles",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/createSubCategory",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "createSubCategory"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subCategoryName\": \"Mobiles\",\n  \"description\": \"Smartphones and feature phones\",\n  \"productType\": {\n    \"id\": \"{{productTypeId}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "A sub category always belongs to one product type (category). Name must be unique inside that type."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('subCategoryId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create sub category - Laptops",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/createSubCategory",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "createSubCategory"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subCategoryName\": \"Laptops\",\n  \"description\": \"Laptops and notebooks\",\n  \"productType\": {\n    \"id\": \"{{productTypeId}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('subCategoryId2', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get all sub categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/getAllSubCategories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "getAllSubCategories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get sub categories of a product type",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/getSubCategoriesByProductType/{{productTypeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "getSubCategoriesByProductType",
+                "{{productTypeId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get sub category by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/getSubCategoryById/{{subCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "getSubCategoryById",
+                "{{subCategoryId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Product types with their sub categories (dropdowns)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/getProductTypesWithSubCategories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "getProductTypesWithSubCategories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update sub category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/updateSubCategory/{{subCategoryId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "updateSubCategory",
+                "{{subCategoryId2}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subCategoryName\": \"Laptops & Notebooks\",\n  \"description\": \"All laptops\",\n  \"productType\": {\n    \"id\": \"{{productTypeId}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete sub category (refused while products use it)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/deleteSubCategory/{{subCategoryId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "deleteSubCategory",
+                "{{subCategoryId2}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Products",
+      "item": [
+        {
+          "name": "Create product (with sub category)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productName\": \"Samsung Galaxy M14 5G\",\n  \"productType\": {\n    \"id\": \"{{productTypeId}}\"\n  },\n  \"subCategory\": {\n    \"id\": \"{{subCategoryId}}\"\n  },\n  \"brand\": {\n    \"id\": \"{{brandId}}\"\n  },\n  \"vendor\": {\n    \"id\": \"{{vendorId}}\"\n  },\n  \"unitType\": {\n    \"id\": \"{{unitTypeId}}\"\n  },\n  \"productMrp\": 15000,\n  \"vendorDiscountPercentage\": 10,\n  \"customerPrice\": 14000,\n  \"gstApplicable\": true,\n  \"applyCgst\": true,\n  \"cgstPercentage\": 9,\n  \"applySgst\": true,\n  \"sgstPercentage\": 9\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('productId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add stock (creates batch + vendor bill, pays part now)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}/add-stock",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}",
+                "add-stock"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"addedQuantity\": 20,\n  \"vendorId\": \"{{vendorId}}\",\n  \"productMrp\": 15000,\n  \"vendorDiscountPercentage\": 10,\n  \"customerPrice\": 14000,\n  \"batchNumber\": \"BATCH-OCT-001\",\n  \"receivedDate\": \"{{today}}\",\n  \"dueDate\": \"{{dueIn30}}\",\n  \"amountPaidNow\": 50000,\n  \"paymentMethod\": \"UPI\",\n  \"transactionRef\": \"UPI-REF-778899\",\n  \"remarks\": \"First restock\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "List products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter products by sub category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?subCategoryId={{subCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "subCategoryId",
+                  "value": "{{subCategoryId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filter products (type + name)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?productTypeId={{productTypeId}}&productName=galaxy",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "productTypeId",
+                  "value": "{{productTypeId}}"
+                },
+                {
+                  "key": "productName",
+                  "value": "galaxy"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export products (CSV)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/export?format=csv&subCategoryId={{subCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "csv"
+                },
+                {
+                  "key": "subCategoryId",
+                  "value": "{{subCategoryId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export products (PDF)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/export?format=pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "pdf"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Orders and payments",
+      "item": [
+        {
+          "name": "Create order (customer, 2 phones)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/createOrder",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "createOrder"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer\": {\n    \"id\": \"{{customerId}}\"\n  },\n  \"orderDate\": \"{{today}}\",\n  \"paymentDueDate\": \"{{dueIn30}}\",\n  \"status\": \"CONFIRMED\",\n  \"orderItems\": [\n    {\n      \"product\": {\n        \"id\": \"{{productId}}\"\n      },\n      \"quantity\": 2,\n      \"customerDiscountPercentage\": 0\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('orderId', json.id);",
+                  "pm.collectionVariables.set('orderTotal', json.totalAmount);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get all orders (filters)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/getAllOrders?search=sneha&status=CONFIRMED&fromDate={{monthAgo}}&toDate={{today}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "getAllOrders"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "sneha"
+                },
+                {
+                  "key": "status",
+                  "value": "CONFIRMED"
+                },
+                {
+                  "key": "fromDate",
+                  "value": "{{monthAgo}}"
+                },
+                {
+                  "key": "toDate",
+                  "value": "{{today}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get order by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/getOrderById/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "getOrderById",
+                "{{orderId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Plain payment (only for orders WITHOUT an installment plan)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/createPayment?orderId={{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "createPayment"
+              ],
+              "query": [
+                {
+                  "key": "orderId",
+                  "value": "{{orderId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 1000,\n  \"paymentMethod\": \"CASH\",\n  \"paymentDate\": \"{{today}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Refused with a clear message when the order has an installment plan - use section 6 instead."
+          }
+        },
+        {
+          "name": "Get payments of order",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/getPaymentsByOrder/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "getPaymentsByOrder",
+                "{{orderId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export orders (PDF)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/exportOrders?format=pdf&status=CONFIRMED",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "exportOrders"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "pdf"
+                },
+                {
+                  "key": "status",
+                  "value": "CONFIRMED"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Invoice PDF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/invoices/print/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "invoices",
+                "print",
+                "{{orderId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Dashboard",
+      "item": [
+        {
+          "name": "Dashboard summary (now includes pendingOrders + installments)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "summary"
+              ]
+            },
+            "description": "Look at: pendingOrders{totalPendingAmount, pendingOrdersCount, unpaidOrdersCount, partiallyPaidOrdersCount, overduePendingAmount...}, customerInstallments, vendorInstallments."
+          }
+        },
+        {
+          "name": "Pending amount of orders (NEW)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/pending-orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "pending-orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Payment status revenue",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/payment-status-revenue",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "payment-status-revenue"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Analytics (7D)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/analytics?range=7D",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "analytics"
+              ],
+              "query": [
+                {
+                  "key": "range",
+                  "value": "7D"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Top selling products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/top-selling?limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "top-selling"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Low stock",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/low-stock?threshold=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "low-stock"
+              ],
+              "query": [
+                {
+                  "key": "threshold",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Customer installments (NEW) - customer pays an order in parts",
+      "item": [
+        {
+          "name": "Create plan - AUTO (3 equal monthly installments)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/order-installments/order/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "order-installments",
+                "order",
+                "{{orderId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numberOfInstallments\": 3,\n  \"firstDueDate\": \"{{dueIn30}}\",\n  \"frequency\": \"MONTHLY\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Covers the amount still UNPAID on the order. Frequency: DAILY, WEEKLY, FORTNIGHTLY or MONTHLY. The last installment takes the rounding."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('installmentId', json.installments[0].id);",
+                  "pm.collectionVariables.set('installmentPending', json.installments[0].pendingAmount);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create plan - CUSTOM schedule (40% / 60%) - use on an order without a plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/order-installments/order/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "order-installments",
+                "order",
+                "{{orderId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"installments\": {{customSchedule}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Delete the existing plan first (request below), because an order can have only one plan."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const total = parseFloat(pm.collectionVariables.get('orderTotal')) || 0;",
+                  "const first = Math.round(total * 0.4 * 100) / 100;",
+                  "const second = Math.round((total - first) * 100) / 100;",
+                  "pm.collectionVariables.set('customSchedule', JSON.stringify([",
+                  "  { dueAmount: first, dueDate: pm.collectionVariables.get('dueIn15') },",
+                  "  { dueAmount: second, dueDate: pm.collectionVariables.get('dueIn60') }",
+                  "]));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('installmentId', json.installments[0].id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get plan of order",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/order-installments/order/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "order-installments",
+                "order",
+                "{{orderId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Pay installment 1 - part payment (UPI)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/order-installments/{{installmentId}}/pay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "order-installments",
+                "{{installmentId}}",
+                "pay"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 2000,\n  \"paymentDate\": \"{{today}}\",\n  \"paymentMethod\": \"UPI\",\n  \"transactionReference\": \"UPI-REF-100200\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Becomes a normal payment of the order too, so order paid/pending, invoice and dashboard stay correct."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const inst = json.installments.find(i => i.id == pm.collectionVariables.get('installmentId'));",
+                  "if (inst) pm.collectionVariables.set('installmentPending', inst.pendingAmount);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pay installment 1 - rest (cash)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/order-installments/{{installmentId}}/pay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "order-installments",
+                "{{installmentId}}",
+                "pay"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"{{installmentPending}}\",\n  \"paymentMethod\": \"CASH\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "'installmentPending' is filled by the previous request and holds the remaining amount of installment 1."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.request.body.raw = pm.request.body.raw.replace('\"{{installmentPending}}\"', '{{installmentPending}}');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Due installments - next 30 days",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/order-installments/due?days=30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "order-installments",
+                "due"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Overdue installments only",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/order-installments/due?overdueOnly=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "order-installments",
+                "due"
+              ],
+              "query": [
+                {
+                  "key": "overdueOnly",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Customer installment summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/order-installments/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "order-installments",
+                "summary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remove plan (only if nothing paid yet)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/order-installments/order/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "order-installments",
+                "order",
+                "{{orderId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Vendor installments (NEW) - store pays a vendor bill in parts",
+      "item": [
+        {
+          "name": "List vendor bills (sets vendorBillId = newest bill)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-bills",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-bills"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const bills = pm.response.json();",
+                  "if (bills.length) {",
+                  "  pm.collectionVariables.set('vendorBillId', bills[0].id);",
+                  "  pm.collectionVariables.set('vendorBillDue', bills[0].dueAmount);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create plan - AUTO (4 equal fortnightly installments)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-bill-installments/bill/{{vendorBillId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-bill-installments",
+                "bill",
+                "{{vendorBillId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numberOfInstallments\": 4,\n  \"firstDueDate\": \"{{dueIn15}}\",\n  \"frequency\": \"FORTNIGHTLY\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Covers the amount still DUE on the bill (what was paid when stock was added is not included)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('vendorInstallmentId', json.installments[0].id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create plan - CUSTOM schedule (50% / 50%) - use on a bill without a plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-bill-installments/bill/{{vendorBillId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-bill-installments",
+                "bill",
+                "{{vendorBillId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"installments\": {{vendorCustomSchedule}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const due = parseFloat(pm.collectionVariables.get('vendorBillDue')) || 0;",
+                  "const first = Math.round(due * 0.5 * 100) / 100;",
+                  "const second = Math.round((due - first) * 100) / 100;",
+                  "pm.collectionVariables.set('vendorCustomSchedule', JSON.stringify([",
+                  "  { dueAmount: first, dueDate: pm.collectionVariables.get('dueIn15') },",
+                  "  { dueAmount: second, dueDate: pm.collectionVariables.get('dueIn60') }",
+                  "]));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('vendorInstallmentId', json.installments[0].id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get plan of vendor bill",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-bill-installments/bill/{{vendorBillId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-bill-installments",
+                "bill",
+                "{{vendorBillId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Pay installment 1 to vendor (bank transfer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-bill-installments/{{vendorInstallmentId}}/pay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-bill-installments",
+                "{{vendorInstallmentId}}",
+                "pay"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 10000,\n  \"paymentDate\": \"{{today}}\",\n  \"paymentMethod\": \"NET_BANKING\",\n  \"transactionReference\": \"NEFT-556677\",\n  \"notes\": \"Installment 1 paid\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Plain vendor payment (refused when a plan exists)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-bills/{{vendorBillId}}/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-bills",
+                "{{vendorBillId}}",
+                "payments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amountPaid\": 500,\n  \"paymentMethod\": \"CASH\",\n  \"notes\": \"Only for bills without a plan\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Payment history of bill",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-bills/{{vendorBillId}}/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-bills",
+                "{{vendorBillId}}",
+                "payments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Due installments to pay - next 30 days",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-bill-installments/due?days=30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-bill-installments",
+                "due"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Overdue installments to pay",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-bill-installments/due?overdueOnly=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-bill-installments",
+                "due"
+              ],
+              "query": [
+                {
+                  "key": "overdueOnly",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Vendor installment summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-bill-installments/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-bill-installments",
+                "summary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remove plan (only if nothing paid yet)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendor-bill-installments/bill/{{vendorBillId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "vendor-bill-installments",
+                "bill",
+                "{{vendorBillId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Shipments",
+      "item": [
+        {
+          "name": "Create shipment - tracking id AUTO generated (NEW)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/createShipment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "createShipment"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order\": {\n    \"id\": \"{{orderId}}\"\n  },\n  \"shipmentName\": \"Galaxy M14 x2 parcel\",\n  \"shipmentCost\": 120.5,\n  \"employeeName\": \"Amit Jadhav\",\n  \"shipmentDate\": \"{{today}}\",\n  \"status\": \"PREPARING\",\n  \"shippedBy\": {\n    \"id\": \"{{shippedById}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "trackingId is NOT sent - the server creates it (TRK + yyMMdd + 6 characters). Customer name / mobile / address are filled from the order."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('shipmentId', json.id);",
+                  "pm.test('tracking id generated', () => pm.expect(json.trackingId).to.match(/^TRK\\d{6}-[A-Z0-9]{6}$/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get all shipments (filters)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/getAllShipments?search=TRK&status=PREPARING",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "getAllShipments"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "TRK"
+                },
+                {
+                  "key": "status",
+                  "value": "PREPARING"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get shipment by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/getShipmentById/{{shipmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "getShipmentById",
+                "{{shipmentId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Shipment receipt (PDF, opens inline) (NEW)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}/receipt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipments",
+                "{{shipmentId}}",
+                "receipt"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Shipment receipt (PDF, download) (NEW)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/shipments/{{shipmentId}}/receipt?download=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "shipments",
+                "{{shipmentId}}",
+                "receipt"
+              ],
+              "query": [
+                {
+                  "key": "download",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Shipments summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/getShipmentsSummary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "getShipmentsSummary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export shipments (CSV)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/exportShipments?format=csv",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "exportShipments"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "csv"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

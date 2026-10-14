@@ -3,7 +3,9 @@ package com.InventoryManagementSystem.serviceimpl;
 import com.InventoryManagementSystem.DTO.VendorBillPaymentRequest;
 import com.InventoryManagementSystem.Enum.PaymentStatus;
 import com.InventoryManagementSystem.entity.VendorBill;
+import com.InventoryManagementSystem.entity.VendorBillInstallment;
 import com.InventoryManagementSystem.entity.VendorPaymentHistory;
+import com.InventoryManagementSystem.repository.VendorBillInstallmentRepository;
 import com.InventoryManagementSystem.repository.VendorBillRepository;
 import com.InventoryManagementSystem.repository.VendorPaymentHistoryRepository;
 import com.InventoryManagementSystem.service.VendorBillPaymentService;
@@ -19,18 +21,32 @@ public class VendorBillPaymentServiceImpl implements VendorBillPaymentService {
 
     private final VendorBillRepository vendorBillRepository;
     private final VendorPaymentHistoryRepository vendorPaymentHistoryRepository;
+    private final VendorBillInstallmentRepository vendorBillInstallmentRepository;
 
     public VendorBillPaymentServiceImpl(
             VendorBillRepository vendorBillRepository,
-            VendorPaymentHistoryRepository vendorPaymentHistoryRepository
+            VendorPaymentHistoryRepository vendorPaymentHistoryRepository,
+            VendorBillInstallmentRepository vendorBillInstallmentRepository
     ) {
         this.vendorBillRepository = vendorBillRepository;
         this.vendorPaymentHistoryRepository = vendorPaymentHistoryRepository;
+        this.vendorBillInstallmentRepository = vendorBillInstallmentRepository;
     }
 
     @Override
     @Transactional
     public VendorPaymentHistory addPayment(Long vendorBillId, VendorBillPaymentRequest request) {
+        return addPayment(vendorBillId, request, null);
+    }
+
+    @Override
+    @Transactional
+    public VendorPaymentHistory addPayment(Long vendorBillId, VendorBillPaymentRequest request, VendorBillInstallment installment) {
+        // A bill on an installment plan is paid installment by installment, so the plan stays correct.
+        if (installment == null && vendorBillInstallmentRepository.existsByVendorBillId(vendorBillId)) {
+            throw new RuntimeException("This vendor bill has an installment plan. Pay it through "
+                    + "/api/vendor-bill-installments/{installmentId}/pay (or remove the plan first)");
+        }
         if (request == null || request.getAmountPaid() == null || request.getAmountPaid().signum() <= 0) {
             throw new RuntimeException("Payment amount must be greater than 0");
         }
@@ -49,6 +65,7 @@ public class VendorBillPaymentServiceImpl implements VendorBillPaymentService {
 
         VendorPaymentHistory history = VendorPaymentHistory.builder()
                 .vendorBill(bill)
+                .installment(installment)
                 .amountPaid(amount)
                 .paymentDate(request.getPaymentDate() != null ? request.getPaymentDate() : LocalDateTime.now())
                 .paymentMethod(request.getPaymentMethod())
@@ -72,6 +89,24 @@ public class VendorBillPaymentServiceImpl implements VendorBillPaymentService {
 
         vendorBillRepository.save(bill);
         return savedHistory;
+    }
+
+    @Override
+    @Transactional
+    public VendorPaymentHistory markPaymentDone(Long vendorBillId) {
+        VendorBill bill = getActiveBill(vendorBillId);
+        BigDecimal due = nvl(bill.getDueAmount());
+
+        if (due.signum() <= 0) {
+            throw new RuntimeException("This vendor bill is already fully paid");
+        }
+
+        VendorBillPaymentRequest request = new VendorBillPaymentRequest();
+        request.setAmountPaid(due);
+        request.setPaymentMethod(null);
+        request.setNotes("Marked as fully paid");
+
+        return addPayment(vendorBillId, request);
     }
 
     @Override

@@ -14,6 +14,7 @@ import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Getter
@@ -109,7 +110,7 @@ public class InventoryOrder {
             orphanRemoval = true
     )
     @JsonManagedReference
-    private List<InventoryOrderItem> orderItems;
+    private List<InventoryOrderItem> orderItems = new ArrayList<>();
 
     @OneToOne(
             mappedBy = "order",

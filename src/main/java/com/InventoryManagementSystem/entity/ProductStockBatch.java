@@ -44,6 +44,9 @@ public class ProductStockBatch {
     @Column(nullable = false)
     private BigDecimal vendorDiscountPercentage;
 
+    // Vendor discount in rupees per unit (on productMrp).
+    private BigDecimal vendorDiscountAmount;
+
     @Column(nullable = false)
     private BigDecimal purchasePrice;
 

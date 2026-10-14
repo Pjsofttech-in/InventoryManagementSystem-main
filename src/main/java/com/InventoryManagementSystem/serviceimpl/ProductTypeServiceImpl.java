@@ -2,6 +2,7 @@ package com.InventoryManagementSystem.serviceimpl;
 
 import com.InventoryManagementSystem.entity.InventoryProductType;
 import com.InventoryManagementSystem.repository.ProductTypeRepository;
+import com.InventoryManagementSystem.repository.SubCategoryRepository;
 import com.InventoryManagementSystem.service.ProductTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,9 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 
     @Autowired
     private ProductTypeRepository productTypeRepository;
+
+    @Autowired
+    private SubCategoryRepository subCategoryRepository;
 
     @Override
     public InventoryProductType saveProductType(InventoryProductType productType) {
@@ -31,6 +35,9 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 
     @Override
     public void deleteProductType(Long id) {
+        if (subCategoryRepository.existsByProductTypeId(id)) {
+            throw new RuntimeException("This product type still has sub categories. Delete them first");
+        }
         productTypeRepository.deleteById(id);
     }
 }

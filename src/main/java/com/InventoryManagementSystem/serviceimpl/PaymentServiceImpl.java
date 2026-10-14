@@ -5,15 +5,18 @@ import com.InventoryManagementSystem.entity.InventoryPayment;
 import com.InventoryManagementSystem.repository.OrderRepository;
 import com.InventoryManagementSystem.repository.BankAccountRepository;
 import com.InventoryManagementSystem.entity.BankAccount;
+import com.InventoryManagementSystem.repository.OrderInstallmentRepository;
 import com.InventoryManagementSystem.repository.PaymentRepository;
 import com.InventoryManagementSystem.service.PaymentService;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate; import java.util.List;
 @Service public class PaymentServiceImpl implements PaymentService {
- private final PaymentRepository paymentRepository; private final OrderRepository orderRepository; private final BankAccountRepository bankAccountRepository;
- public PaymentServiceImpl(PaymentRepository p,OrderRepository o,BankAccountRepository b){paymentRepository=p;orderRepository=o;bankAccountRepository=b;}
+ private final PaymentRepository paymentRepository; private final OrderRepository orderRepository; private final BankAccountRepository bankAccountRepository; private final OrderInstallmentRepository orderInstallmentRepository;
+ public PaymentServiceImpl(PaymentRepository p,OrderRepository o,BankAccountRepository b,OrderInstallmentRepository i){paymentRepository=p;orderRepository=o;bankAccountRepository=b;orderInstallmentRepository=i;}
  @Override public InventoryPayment createPayment(Long orderId,InventoryPayment payment){
    InventoryOrder order=orderRepository.findById(orderId).orElseThrow(()->new RuntimeException("Order not found with ID: "+orderId));
+   // An order on an installment plan is paid installment by installment (payment.getInstallment() is only set by that service).
+   if(payment.getInstallment()==null && orderInstallmentRepository.existsByOrderId(orderId)) throw new RuntimeException("This order has an installment plan. Pay it through /api/order-installments/{installmentId}/pay (or remove the plan first)");
    double amount=payment.getAmount()==null?0:payment.getAmount(); if(amount<0)throw new RuntimeException("Payment amount cannot be negative");
    double existing=getPaymentsByOrderId(orderId).stream().filter(p->p.getPaymentStatus()==PaymentStatus.PAID||p.getPaymentStatus()==PaymentStatus.PARTIAL).mapToDouble(p->p.getAmount()==null?0:p.getAmount()).sum();
    double total=order.getTotalAmount()==null?0:order.getTotalAmount(); if(amount>0 && existing+amount>total+0.009)throw new RuntimeException("Payment exceeds the pending amount");

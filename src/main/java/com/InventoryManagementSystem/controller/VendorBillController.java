@@ -1,20 +1,18 @@
 package com.InventoryManagementSystem.controller;
 
+import com.InventoryManagementSystem.DTO.VendorBillDetailDTO;
 import com.InventoryManagementSystem.DTO.VendorBillPaymentRequest;
+import com.InventoryManagementSystem.DTO.VendorBillSummaryDTO;
 import com.InventoryManagementSystem.entity.VendorBill;
 import com.InventoryManagementSystem.entity.VendorPaymentHistory;
 import com.InventoryManagementSystem.repository.VendorBillRepository;
 import com.InventoryManagementSystem.service.VendorBillPaymentService;
-import com.InventoryManagementSystem.service.VendorBillPdfService;
+import com.InventoryManagementSystem.service.VendorBillSummaryService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.ByteArrayInputStream;
 import java.util.List;
 
 @RestController
@@ -26,10 +24,22 @@ public class VendorBillController {
     private VendorBillRepository vendorBillRepository;
 
     @Autowired
-    private VendorBillPdfService vendorBillPdfService;
+    private VendorBillPaymentService vendorBillPaymentService;
 
     @Autowired
-    private VendorBillPaymentService vendorBillPaymentService;
+    private VendorBillSummaryService vendorBillSummaryService;
+
+    /** Vendor Bills page: one row per vendor with total / paid / remaining. */
+    @GetMapping("/summary")
+    public List<VendorBillSummaryDTO> getVendorSummaries() {
+        return vendorBillSummaryService.getVendorSummaries();
+    }
+
+    /** "View details" button: vendor totals + all bills + installment history. */
+    @GetMapping("/vendor/{vendorId}/detail")
+    public VendorBillDetailDTO getVendorDetail(@PathVariable Long vendorId) {
+        return vendorBillSummaryService.getVendorDetail(vendorId);
+    }
 
     @GetMapping
     public List<VendorBill> getAll() {
@@ -60,17 +70,9 @@ public class VendorBillController {
         return ResponseEntity.status(HttpStatus.CREATED).body(payment);
     }
 
-    @GetMapping("/print/{id}")
-    public ResponseEntity<InputStreamResource> print(@PathVariable Long id) {
-        VendorBill bill = vendorBillPaymentService.getVendorBill(id);
-        ByteArrayInputStream pdf = vendorBillPdfService.generateVendorBillPdf(bill);
-
-        return ResponseEntity.ok()
-                .header(
-                        HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=VendorBill_" + bill.getBillNumber() + ".pdf"
-                )
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(new InputStreamResource(pdf));
+    @PostMapping("/{id}/mark-paid")
+    public ResponseEntity<VendorPaymentHistory> markPaymentDone(@PathVariable Long id) {
+        VendorPaymentHistory payment = vendorBillPaymentService.markPaymentDone(id);
+        return ResponseEntity.status(HttpStatus.CREATED).body(payment);
     }
 }

@@ -65,6 +65,9 @@ public class SecurityConfig {
         // Allow all headers (including Authorization, Content-Type)
         configuration.setAllowedHeaders(List.of("*"));
 
+        // Let the browser read the file name of PDF/CSV downloads
+        configuration.setExposedHeaders(List.of("Content-Disposition"));
+
         // Allow credentials like cookies or Auth headers
         configuration.setAllowCredentials(true);
 

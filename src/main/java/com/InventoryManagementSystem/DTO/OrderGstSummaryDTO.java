@@ -4,8 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 /*
- * Grand-total summary shown on the Orders page:
- * - Total GST collected across every order (with CGST/SGST/UGST/IGST split).
+ * Grand-total summary shown on the Orders page (cancelled orders are not counted in the money totals):
+ * - Total order amount, paid amount and pending amount across all orders.
+ * - Total GST across every order (with CGST/SGST/UGST/IGST split).
  * - How many orders currently have an overdue payment, and how much money
  *   that overdue amount adds up to.
  */
@@ -13,6 +14,10 @@ import lombok.Setter;
 @Setter
 public class OrderGstSummaryDTO {
     private int totalOrders;
+    private int cancelledOrdersCount;
+    private Double totalOrderAmount = 0.0;
+    private Double totalPaidAmount = 0.0;
+    private Double totalPendingAmount = 0.0;
     private Double totalGstAmount = 0.0;
     private Double totalCgstAmount = 0.0;
     private Double totalSgstAmount = 0.0;

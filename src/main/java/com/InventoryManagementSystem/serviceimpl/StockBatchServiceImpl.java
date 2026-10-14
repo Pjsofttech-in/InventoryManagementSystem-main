@@ -6,6 +6,7 @@ import com.InventoryManagementSystem.Enum.PaymentMethod;
 import com.InventoryManagementSystem.entity.*;
 import com.InventoryManagementSystem.repository.*;
 import com.InventoryManagementSystem.service.StockBatchService;
+import com.InventoryManagementSystem.util.VendorPricingUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,17 +47,35 @@ public class StockBatchServiceImpl implements StockBatchService {
         InventoryVendor vendor = vendorRepository.findById(request.getVendorId())
                 .orElseThrow(() -> new RuntimeException("Vendor not found with ID: " + request.getVendorId()));
 
+        if (request.getQuantity() == null || request.getQuantity() <= 0) {
+            throw new RuntimeException("Quantity must be greater than 0");
+        }
+
+        // Vendor discount is on the ACTUAL product MRP: flat discount (Rs) OR % given, the other is calculated.
+        Double productMrp = request.getProductMrp() != null ? request.getProductMrp().doubleValue() : product.getProductMrp();
+        Double flatDiscount = request.getVendorDiscountAmount() != null ? request.getVendorDiscountAmount().doubleValue() : null;
+        Double flatPrice = request.getVendorFlatPrice() != null ? request.getVendorFlatPrice().doubleValue() : null; // vendor flat price = purchase price
+        Double pctIn = request.getVendorDiscountPercentage() != null ? request.getVendorDiscountPercentage().doubleValue() : null;
+        boolean hasFlat = (flatDiscount != null && flatDiscount > 0) || (flatPrice != null && flatPrice > 0);
+        if (!hasFlat && pctIn == null) pctIn = product.getVendorDiscountPercentage();
+        VendorPricingUtil.Result pricing = VendorPricingUtil.resolve(productMrp, pctIn, flatDiscount, flatPrice);
+        product.setVendorPricingMode(hasFlat ? "FLAT" : "PERCENT");
+        BigDecimal purchasePrice = BigDecimal.valueOf(pricing.purchasePrice());
+        BigDecimal sellingPrice = request.getSellingPrice() != null
+                ? request.getSellingPrice() : BigDecimal.valueOf(product.getCustomerPrice());
+
         ProductStockBatch batch = ProductStockBatch.builder()
                 .product(product)
                 .vendor(vendor)
                 .batchNumber(request.getBatchNumber() != null && !request.getBatchNumber().isBlank()
                         ? request.getBatchNumber()
                         : "BATCH-" + System.currentTimeMillis())
-                .vendorMrp(request.getVendorMrp() == null ? BigDecimal.ZERO : request.getVendorMrp())
-                .vendorDiscountPercentage(request.getVendorDiscountPercentage() == null ? BigDecimal.ZERO : request.getVendorDiscountPercentage())
-                .purchasePrice(request.getPurchasePrice())
-                .productMrp(request.getProductMrp() == null ? BigDecimal.ZERO : request.getProductMrp())
-                .sellingPrice(request.getSellingPrice())
+                .vendorMrp(BigDecimal.valueOf(productMrp))
+                .vendorDiscountPercentage(BigDecimal.valueOf(pricing.discountPercentage()))
+                .vendorDiscountAmount(BigDecimal.valueOf(pricing.discountAmount()))
+                .purchasePrice(purchasePrice)
+                .productMrp(BigDecimal.valueOf(productMrp))
+                .sellingPrice(sellingPrice)
                 .initialQuantity(request.getQuantity())
                 .availableQuantity(request.getQuantity())
                 .receivedDate(request.getReceivedDate() != null ? request.getReceivedDate() : LocalDate.now())
@@ -69,11 +88,11 @@ public class StockBatchServiceImpl implements StockBatchService {
         int currentTotal = product.getStock() != null ? product.getStock() : 0;
         product.setStock(currentTotal + request.getQuantity());
         product.setVendor(vendor);
-        if (request.getVendorMrp() != null) product.setMrp(request.getVendorMrp().doubleValue());
-        if (request.getVendorDiscountPercentage() != null) product.setVendorDiscountPercentage(request.getVendorDiscountPercentage().doubleValue());
-        if (request.getPurchasePrice() != null) product.setStorePrice(request.getPurchasePrice().doubleValue());
-        if (request.getProductMrp() != null) product.setProductMrp(request.getProductMrp().doubleValue());
-        if (request.getSellingPrice() != null) product.setCustomerPrice(request.getSellingPrice().doubleValue());
+        product.setProductMrp(productMrp);
+        product.setVendorDiscountPercentage(pricing.discountPercentage());
+        product.setVendorDiscountAmount(pricing.discountAmount());
+        product.setStorePrice(pricing.purchasePrice());
+        product.setCustomerPrice(sellingPrice.doubleValue());
         productRepository.save(product);
 
         StockHistory history = new StockHistory(
@@ -83,7 +102,7 @@ public class StockBatchServiceImpl implements StockBatchService {
         stockHistoryRepository.save(history);
 
         // 2. Generate Vendor Bill
-        BigDecimal totalBillAmount = request.getPurchasePrice().multiply(BigDecimal.valueOf(request.getQuantity()));
+        BigDecimal totalBillAmount = purchasePrice.multiply(BigDecimal.valueOf(request.getQuantity()));
         BigDecimal paidNow = request.getAmountPaidNow() != null ? request.getAmountPaidNow() : BigDecimal.ZERO;
         BigDecimal due = totalBillAmount.subtract(paidNow);
 

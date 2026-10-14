@@ -17,4 +17,8 @@ public interface ProductStockBatchRepository extends JpaRepository<ProductStockB
 
     // FIFO query for active stock batches
     List<ProductStockBatch> findByProductIdAndAvailableQuantityGreaterThanAndIsDeletedFalseOrderByReceivedDateAsc(Long productId, Integer minQty);
+
+    // All active batches, including fully consumed batches. Required when stock
+    // is restored after an order update/delete/cancellation.
+    List<ProductStockBatch> findByProductIdAndIsDeletedFalseOrderByReceivedDateAsc(Long productId);
 }
