@@ -57,7 +57,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // Allow Vite frontend origin and production origin
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://pjsofttech.com"));
+//        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://pjsofttech.com"));
+        configuration.setAllowedOrigins(List.of(""));
 
         // Allow HTTP methods
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -69,7 +70,7 @@ public class SecurityConfig {
         configuration.setExposedHeaders(List.of("Content-Disposition"));
 
         // Allow credentials like cookies or Auth headers
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
